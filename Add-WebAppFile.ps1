@@ -9,7 +9,6 @@ function Add-AzWebAppFile {
         # Files to upload
         [Parameter(Mandatory=$true,
                    Position=1,
-                   ParameterSetName="ParameterSetName",
                    ValueFromPipeline=$true,
                    HelpMessage="Path to one or more locations.")]
         [Alias("PSPath")]
