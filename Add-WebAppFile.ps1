@@ -1,14 +1,29 @@
 function Add-AzWebAppFile {
     [CmdletBinding()]
     param (
-        # Target Directory
+        # The name of the resource group containing the app service.
         [Parameter(Mandatory=$true, Position=0)]
+        [string]
+        $ResourceGroupName,
+
+        # The name of the webapp
+        [Parameter(Mandatory=$true, Position=1)]
+        [string]
+        $WebAppName,
+
+        # The name of the webapp slot
+        [Parameter(Mandatory=$true, Position=2)]
+        [string]
+        $SlotName,
+
+        # Target Directory
+        [Parameter(Mandatory=$true, Position=3)]
         [string]
         $TargetDirectory,
 
         # Files to upload
         [Parameter(Mandatory=$true,
-                   Position=1,
+                   Position=4,
                    ValueFromPipeline=$true,
                    HelpMessage="Path to one or more locations.")]
         [Alias("PSPath")]
@@ -18,7 +33,7 @@ function Add-AzWebAppFile {
     )
     
     begin {
-        $profile=[xml](Get-AzWebAppSlotPublishingProfile -ResourceGroupName petclinic -Name tailwag -Slot staging -Format ftp) | Select-Object -ExpandProperty publishData | Select-Object -ExpandProperty publishProfile | Where-Object publishMethod -eq 'MSDeploy'
+        $profile=[xml](Get-AzWebAppSlotPublishingProfile -ResourceGroupName $ResourceGroupName -Name $WebAppName -Slot $SlotName -Format ftp) | Select-Object -ExpandProperty publishData | Select-Object -ExpandProperty publishProfile | Where-Object publishMethod -eq 'MSDeploy'
         $credential=[PSCredential]::new("$($profile.userName)", (ConvertTo-SecureString -AsPlainText $profile.userPWD -Force))
         $apiLocation="https://$($profile.publishUrl)/api/vfs"
     }
