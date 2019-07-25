@@ -1,3 +1,5 @@
+#!/usr/bin/env pwsh
+
 function Add-AzWebAppFile {
     [CmdletBinding()]
     param (
