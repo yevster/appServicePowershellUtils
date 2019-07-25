@@ -1,6 +1,12 @@
 #!/usr/bin/env pwsh
 
 function Add-AzWebAppFile {
+    <#
+    .Description
+    Uploads files to Azure App Service application file system.
+    #>
+
+
     [CmdletBinding()]
     param (
         # The name of the resource group containing the app service.
@@ -18,7 +24,7 @@ function Add-AzWebAppFile {
         [string]
         $SlotName,
 
-        # Target Directory
+        # Target Directory, where "/" is "/home" on the App Service file system.
         [Parameter(Mandatory=$true, Position=3)]
         [string]
         $TargetDirectory,
@@ -43,9 +49,8 @@ function Add-AzWebAppFile {
     process {
         $item = Get-Item $File
         if ($item -is [System.IO.FileInfo]) {
-            $targetPath = $item | Resolve-Path -Relative 
             Write-Host "Uploading ${targetPath}"
-            Invoke-RestMethod -Credential $credential -Authentication Basic -Method PUT -InFile $File -Uri "${apiLocation}/${TargetDirectory}/${targetPath}" > $null
+            Invoke-RestMethod -Credential $credential -Authentication Basic -Method PUT -InFile $File -Uri "${apiLocation}/${TargetDirectory}" > $null
         }
     }
 }
