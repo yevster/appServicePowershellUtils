@@ -37,7 +37,12 @@ function Add-AzWebAppFile {
         [Alias("PSPath")]
         [ValidateNotNullOrEmpty()]
         [string]
-        $File
+        $File,
+
+        # Overwrite if a file already existss
+        [Parameter()]
+        [switch]
+        $Force
     )
     
     begin {
@@ -49,8 +54,14 @@ function Add-AzWebAppFile {
     process {
         $item = Get-Item $File
         if ($item -is [System.IO.FileInfo]) {
-            Write-Host "Uploading ${targetPath}"
-            Invoke-RestMethod -Credential $credential -Authentication Basic -Method PUT -InFile $File -Uri "${apiLocation}/${TargetDirectory}" > $null
+            Write-Host "Uploading $($item.Name)"
+            $headers=@{}
+            if ($Force) {
+                $headers['If-Match'] ='*'
+            }
+            Invoke-RestMethod -Credential $credential `
+                -Authentication Basic -Method PUT -InFile $File `
+                -Uri "${apiLocation}/${TargetDirectory}" -Headers $headers > $null
         }
     }
 }
