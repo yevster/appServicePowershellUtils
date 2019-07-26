@@ -59,9 +59,10 @@ function Add-AzWebAppFile {
             if ($Force) {
                 $headers['If-Match'] ='*'
             }
+            
             Invoke-RestMethod -Credential $credential `
                 -Authentication Basic -Method PUT -InFile $File `
-                -Uri "${apiLocation}/${TargetDirectory}" -Headers $headers > $null
+                -Uri "${apiLocation}/$($TargetDirectory.TrimStart('/'))/$($item.Name)" -Headers $headers > $null
         }
     }
 }
