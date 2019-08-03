@@ -1,3 +1,3 @@
-# appServiceFileUpload
+# App Service Powershell Utilities
 
-A utility to upload files to Azure App Service using PowerShell.
+PowerShell utilities for migration/deployment tasks with Azure App Service
