@@ -20,7 +20,7 @@ function Add-AzWebAppFile {
         $WebAppName,
 
         # The name of the webapp slot
-        [Parameter(Mandatory=$true, Position=2)]
+        [Parameter(Mandatory=$false, Position=2)]
         [string]
         $SlotName,
 
@@ -46,9 +46,19 @@ function Add-AzWebAppFile {
     )
     
     begin {
-        $profile=[xml](Get-AzWebAppSlotPublishingProfile -ResourceGroupName $ResourceGroupName -Name $WebAppName -Slot $SlotName -Format ftp) | Select-Object -ExpandProperty publishData | Select-Object -ExpandProperty publishProfile | Where-Object publishMethod -eq 'MSDeploy'
-        $credential=[PSCredential]::new("$($profile.userName)", (ConvertTo-SecureString -AsPlainText $profile.userPWD -Force))
-        $apiLocation="https://$($profile.publishUrl)/api/vfs"
+        if ($SlotName){
+            $target = Get-AzWebAppSlotPublishingProfile -ResourceGroupName $ResourceGroupName -Name $WebAppName -Slot $SlotName -Format ftp
+        } else {
+            $target = Get-AzWebAppPublishingProfile  -ResourceGroupName $ResourceGroupName -Name $WebAppName -Format ftp
+        }
+
+        if (!$target) {
+            throw "Unable to obtain publishing profile."
+        }
+
+        $publishProfile=[xml]$target | Select-Object -ExpandProperty publishData | Select-Object -ExpandProperty publishProfile | Where-Object publishMethod -eq 'MSDeploy'
+        $credential=[PSCredential]::new("$($publishProfile.userName)", (ConvertTo-SecureString -AsPlainText $publishProfile.userPWD -Force))
+        $apiLocation="https://$($publishProfile.publishUrl)/api/vfs"
     }
     
     process {
