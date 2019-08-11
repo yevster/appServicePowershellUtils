@@ -17,9 +17,9 @@ function Set-AzWebAppSettings {
         $WebAppName,
 
         # The name of the webapp slot
-        [Parameter(Mandatory=$true, Position=2)]
+        [Parameter(Mandatory=$false, Position=2)]
         [string]
-        $SlotName,
+        $SlotName = 'production',
 
         # The property file containing the settings to be set
         [Parameter(Mandatory=$true, Position=3)]
@@ -33,6 +33,5 @@ function Set-AzWebAppSettings {
     $props = Get-Content $SettingsFile | ConvertFrom-StringData
     $props.Keys | %{ $newSettings[$_]=$props.$_}
     Set-AzWebAppSlot -ResourceGroupName $ResourceGroupName -Name $WebAppName -Slot $SlotName -AppSettings $newSettings
-
 }
 
