@@ -39,9 +39,9 @@ function Set-AzWebAppSettings {
         $settingsSetter = { param ($newSettings) Set-AzWebApp -ResourceGroupName $ResourceGroupName -Name $WebAppName -AppSettings $newSettings }
     }
 
-    $slotSettings = &$settingsGetter
+    $oldSettings = &$settingsGetter
     $newSettings = @{ }
-    $slotSettings | ForEach-Object { $newSettings[$_.Name] = $_.Value }
+    $oldSettings | ForEach-Object { $newSettings[$_.Name] = $_.Value }
     $props = Get-Content $SettingsFile | ConvertFrom-StringData
     $props.Keys | ForEach-Object { $newSettings[$_] = $props.$_ }
     &$settingsSetter $newSettings
