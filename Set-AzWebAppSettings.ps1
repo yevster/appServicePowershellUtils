@@ -7,31 +7,43 @@ function Set-AzWebAppSettings {
 
     param (
         # The name of the resource group containing the app service.
-        [Parameter(Mandatory=$true, Position=0)]
+        [Parameter(Mandatory = $true, Position = 0)]
         [string]
         $ResourceGroupName,
 
         # The name of the webapp
-        [Parameter(Mandatory=$true, Position=1)]
+        [Parameter(Mandatory = $true, Position = 1)]
         [string]
         $WebAppName,
 
         # The name of the webapp slot
-        [Parameter(Mandatory=$false, Position=2)]
+        [Parameter(Mandatory = $false, Position = 2)]
         [string]
-        $SlotName = 'production',
+        $SlotName,
 
         # The property file containing the settings to be set
-        [Parameter(Mandatory=$true, Position=3)]
+        [Parameter(Mandatory = $true, Position = 3)]
         [string]
         $SettingsFile
     )
 
-    $slotSettings = (Get-AzWebAppSlot -ResourceGroupName $ResourceGroupName -Name $WebAppName -Slot $SlotName).SiteConfig.AppSettings
-    $newSettings=@{}
-    $slotSettings | % {$newSettings[$_.Name] = $_.Value}
+    $ErrorActionPreference = [System.Management.Automation.ActionPreference]::Stop
+
+    # Determine whether or not to work on app-level or slot-level
+    if ($SlotName) {
+        $settingsGetter = { (Get-AzWebAppSlot -ResourceGroupName $ResourceGroupName -Name $WebAppName -Slot $SlotName).SiteConfig.AppSettings }
+        $settingsSetter = { param ($newSettings) Set-AzWebAppSlot -ResourceGroupName $ResourceGroupName -Name $WebAppName -Slot $SlotName -AppSettings $newSettings }
+    }
+    else {
+        $settingsGetter = { (Get-AzWebApp -ResourceGroupName $ResourceGroupName -Name $WebAppName).SiteConfig.AppSettings }
+        $settingsSetter = { param ($newSettings) Set-AzWebApp -ResourceGroupName $ResourceGroupName -Name $WebAppName -AppSettings $newSettings }
+    }
+
+    $slotSettings = &$settingsGetter
+    $newSettings = @{ }
+    $slotSettings | ForEach-Object { $newSettings[$_.Name] = $_.Value }
     $props = Get-Content $SettingsFile | ConvertFrom-StringData
-    $props.Keys | %{ $newSettings[$_]=$props.$_}
-    Set-AzWebAppSlot -ResourceGroupName $ResourceGroupName -Name $WebAppName -Slot $SlotName -AppSettings $newSettings
+    $props.Keys | ForEach-Object { $newSettings[$_] = $props.$_ }
+    &$settingsSetter $newSettings
 }
 
