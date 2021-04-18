@@ -6,4 +6,8 @@ PowerShell utilities for migration/deployment tasks with Azure App Service
 
 [`Set-AzWebAppSettings`](Set-AzWebAppSettings.ps1) - Applies settings from a property file in `key=value` form to App Service.
 
+**Bonus utility**
+
+*Not app-service specific but often useful in the same context*
+
 [`Remove-NonLatestSnapshots`](Remove-NonLatestSnapshots.ps1) - When running a release pipeline in Azure Pipelines on a Maven snapshot artifact, multiple versions of the same file (typically a Jar file) may be present. In such cases, this command can be used to keep only the latest one.
